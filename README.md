@@ -1,0 +1,93 @@
+# sweep
+
+A TUI tool for finding and removing bloated project directories that waste disk space.
+
+## What it does
+
+`sweep` scans directories for large project dependency/build folders and presents them in an interactive TUI where you can:
+
+- See exactly how much space each directory consumes
+- Check when each directory was last modified
+- Toggle directories for batch removal
+- Delete with a single keystroke
+
+## Supported targets
+
+| Directory | Language / Framework |
+|-----------|-------------------|
+| `node_modules` | Node.js |
+| `target` | Rust, Maven (Java) |
+| `.next` | Next.js |
+| `__pycache__` | Python |
+| `.venv` / `venv` | Python virtual environments |
+| `dist` / `build` | JS/TS bundlers, Gradle (Java/Kotlin) |
+| `vendor` | Go, PHP (Composer) |
+| `Pods` | iOS (CocoaPods) |
+| `bower_components` | Legacy JavaScript |
+| `.tox` | Python (tox) |
+| `out` | Kotlin/Java |
+
+### Lock file detection
+
+`sweep` detects the language/package manager by scanning for lock files and manifests in the parent directory:
+
+| Lock file | Package manager |
+|-----------|----------------|
+| `package-lock.json` | npm |
+| `pnpm-lock.yaml` | pnpm |
+| `bun.lockb` | bun |
+| `deno.lock` | deno |
+| `yarn.lock` | yarn |
+| `Cargo.lock` | Cargo (Rust) |
+| `go.sum` | Go |
+| `Gemfile.lock` | Bundler (Ruby) |
+| `composer.lock` | Composer (PHP) |
+
+### Monorepo detection
+
+`sweep` identifies monorepo structures to help you understand what you're deleting:
+
+| File | Monorepo tool |
+|------|--------------|
+| `pnpm-workspace.yaml` | pnpm workspaces |
+| `turbo.json` | Turborepo |
+| `nx.json` | Nx |
+| `lerna.json` | Lerna |
+| `workspaces` in `package.json` | npm/yarn workspaces |
+| `Cargo.toml` with `members` | Rust workspace |
+
+Root-level `node_modules` in monorepos are highlighted as they may be shared across packages — deleting them could break the entire workspace.
+
+## TUI preview
+
+```
+Project                  Type       Size      Modified
+─────────────────────────────────────────────────────────
+my-app                   pnpm       2.3 GB    2024-01-15
+  ├─ node_modules        (root)     1.2 GB    2024-01-15
+  ├─ packages/api        (pkg)      800 MB    2024-01-14
+rust-project             cargo      4.5 GB    2024-01-10
+  └─ target              (root)     4.5 GB    2024-01-10
+```
+
+## Usage
+
+```bash
+# Scan current directory
+sweep
+
+# Scan a specific directory
+sweep --dir /path/to/projects
+```
+
+## Installation
+
+```bash
+cargo install sweep
+```
+
+Or via npm (coming soon):
+
+```bash
+npx sweep
+```
