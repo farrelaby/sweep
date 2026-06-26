@@ -106,7 +106,7 @@ sweep — scanning /home/projects
 
 ### 2. Browsing
 
-The main tree view as described above. Default sort is by total project size (largest first).
+The main tree view as described above. Default ordering is by project name (A → Z).
 
 ### 3. Confirm delete
 
@@ -157,4 +157,4 @@ Done!  ✔  3 deleted,  5.2 GB reclaimed
 - **Selection change**: status bar updates immediately ("3 selected ● 4.1 GB reclaimable")
 - **Permission errors**: marked with `⚠` icon, shown inline with the directory name
 - **Empty state**: "No sweepable directories found" message when scan returns nothing
-- **Sorting**: default by project total size descending (largest first)
+- **Ordering**: press `o` to reorder by name, date, or size (ascending/descending)

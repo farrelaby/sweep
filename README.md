@@ -61,13 +61,17 @@ Root-level `node_modules` in monorepos are highlighted as they may be shared acr
 ## TUI preview
 
 ```
-Project                  Type       Size      Modified
-─────────────────────────────────────────────────────────
-my-app                   pnpm       2.3 GB    2024-01-15
-  ├─ node_modules        (root)     1.2 GB    2024-01-15
-  ├─ packages/api        (pkg)      800 MB    2024-01-14
-rust-project             cargo      4.5 GB    2024-01-10
-  └─ target              (root)     4.5 GB    2024-01-10
+ sweep — /home/user/projects  |  6.8 GiB reclaimable  |  scan 0.6s
+
+   my-app (pnpm)
+ ▶ └ [●] node_modules    1.2 GiB   3 days ago
+     [●] dist            800 MiB   2 days ago
+   rust-project (cargo)
+   └ [●] target          4.5 GiB   10 days ago
+   my-other-app (npm)
+     [ ] .next           350 MiB   just now
+
+ [Space] toggle  [a] all  [d] none  [Enter] delete  [q] quit  3 selected | 6.50 GiB | 1/6
 ```
 
 ## Usage
