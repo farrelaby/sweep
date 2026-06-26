@@ -95,7 +95,10 @@ fn render_main(state: &mut AppState, frame: &mut Frame, area: Rect) {
             render_browsing(state, frame, area);
             render_confirm_dialog(state, frame, area);
         }
-        AppPhase::Deleting => render_deleting(state, frame, area),
+        AppPhase::Deleting => {
+            render_browsing(state, frame, area);
+            render_deleting(state, frame, area);
+        }
         AppPhase::ConfirmQuit => {
             render_browsing(state, frame, area);
             render_confirm_quit_dialog(state, frame, area);
@@ -450,6 +453,20 @@ fn render_confirm_quit_dialog(_state: &AppState, frame: &mut Frame, area: Rect) 
 }
 
 fn render_deleting(state: &AppState, frame: &mut Frame, area: Rect) {
+    let dialog_width = 36.min(area.width.saturating_sub(4));
+    let dialog_height = 9.min(area.height.saturating_sub(4));
+    let x = (area.width - dialog_width) / 2;
+    let y = (area.height - dialog_height) / 2;
+
+    let dialog_area = Rect {
+        x: area.x + x,
+        y: area.y + y,
+        width: dialog_width,
+        height: dialog_height,
+    };
+
+    frame.render_widget(Clear, dialog_area);
+
     let current = state
         .deleting_paths
         .get(state.deleting_index)
@@ -459,7 +476,7 @@ fn render_deleting(state: &AppState, frame: &mut Frame, area: Rect) {
 
     let progress = format!("{}/{}", state.deleting_index + 1, state.deleting_paths.len());
 
-    let text = Text::from(vec![
+    let lines = vec![
         Line::from(Span::styled(
             " Deleting...",
             Style::default()
@@ -476,10 +493,18 @@ fn render_deleting(state: &AppState, frame: &mut Frame, area: Rect) {
             format!("  {} complete", progress),
             Style::default().fg(palette::TIME),
         )),
-    ]);
+    ];
 
-    let block = Paragraph::new(text).block(Block::default());
-    frame.render_widget(block, area);
+    let dialog = Paragraph::new(Text::from(lines))
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .style(Style::default().fg(palette::DIALOG_BORDER)),
+        )
+        .alignment(Alignment::Left);
+
+    frame.render_widget(dialog, dialog_area);
 }
 
 fn render_status_bar(state: &AppState, frame: &mut Frame, area: Rect) {
