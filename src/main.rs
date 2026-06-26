@@ -145,7 +145,10 @@ fn run_app(
             let ok = match state.delete_preference {
                 DeletePreference::Trash => trash::delete(&path).is_ok(),
                 DeletePreference::Permanent => std::fs::remove_dir_all(&path).is_ok(),
-                DeletePreference::DryRun => true,
+                DeletePreference::DryRun => {
+                    std::thread::sleep(Duration::from_millis(500));
+                    true
+                }
             };
 
             state.deleting_index += 1;
@@ -288,7 +291,14 @@ fn handle_confirm_key(code: KeyCode, state: &mut AppState) -> io::Result<()> {
         KeyCode::Esc => {
             state.phase = AppPhase::Browsing;
         }
-        KeyCode::Up | KeyCode::Down | KeyCode::Char('k') | KeyCode::Char('j') | KeyCode::Tab => {
+        KeyCode::Up | KeyCode::Char('k') => {
+            state.delete_preference = match state.delete_preference {
+                DeletePreference::DryRun => DeletePreference::Permanent,
+                DeletePreference::Trash => DeletePreference::DryRun,
+                DeletePreference::Permanent => DeletePreference::Trash,
+            };
+        }
+        KeyCode::Down | KeyCode::Char('j') | KeyCode::Tab => {
             state.delete_preference = match state.delete_preference {
                 DeletePreference::DryRun => DeletePreference::Trash,
                 DeletePreference::Trash => DeletePreference::Permanent,

@@ -374,18 +374,19 @@ fn render_confirm_dialog(state: &AppState, frame: &mut Frame, area: Rect) {
     )));
     lines.push(Line::from(""));
 
-    let (trash_fg, permanent_fg) = match state.delete_preference {
-        DeletePreference::Trash => (palette::SELECTED, palette::DIALOG_HINT),
-        DeletePreference::Permanent => (palette::DIALOG_HINT, palette::SELECTED),
-        DeletePreference::DryRun => (palette::DIALOG_HINT, palette::DIALOG_HINT),
+    let (dry_fg, trash_fg, permanent_fg) = match state.delete_preference {
+        DeletePreference::DryRun => (palette::SELECTED, palette::DIALOG_HINT, palette::DIALOG_HINT),
+        DeletePreference::Trash => (palette::DIALOG_HINT, palette::SELECTED, palette::DIALOG_HINT),
+        DeletePreference::Permanent => (palette::DIALOG_HINT, palette::DIALOG_HINT, palette::SELECTED),
     };
 
     lines.push(Line::from(vec![
-        // Span::styled("  [\u{25CF}] ", trash_fg),
+        Span::styled("  Dry run (show only)", dry_fg),
+    ]));
+    lines.push(Line::from(vec![
         Span::styled("  Trash (move to trash)", trash_fg),
     ]));
     lines.push(Line::from(vec![
-        // Span::styled("  [ ] ", permanent_fg),
         Span::styled("  Permanent delete", permanent_fg),
     ]));
     lines.push(Line::from(""));
