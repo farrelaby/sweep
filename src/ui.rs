@@ -476,7 +476,7 @@ fn render_status_bar(state: &AppState, frame: &mut Frame, area: Rect) {
                 frame.render_widget(status, area);
                 return;
             } else {
-                let hints = " [Space] toggle  [a] all  [d] none  [Enter] delete  [q] quit";
+                let hints = " [Space] toggle  [a] all  [d] none  [Enter] delete  [o] order-by  [q] quit";
 
                 let mut extra_parts = Vec::new();
                 if let Some(ref size_status) = state.sizes_status() {
