@@ -7,12 +7,9 @@ on:
 permissions:
   contents: write
   packages: write
-  id-token: write
 
 env:
   CARGO_TERM_COLOR: always
-  CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 jobs:
   build:
@@ -99,6 +96,9 @@ jobs:
     name: Publish to crates.io
     needs: [build]
     runs-on: ubuntu-latest
+    environment: cicd
+    env:
+      CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -115,6 +115,9 @@ jobs:
     name: Publish to npm
     needs: [build]
     runs-on: ubuntu-latest
+    environment: cicd
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
