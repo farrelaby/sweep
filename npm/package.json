@@ -1,0 +1,41 @@
+{
+  "name": "dirsweep",
+  "version": "0.1.0",
+  "description": "A TUI tool for finding and removing bloated project directories",
+  "bin": {
+    "dirsweep": "./bin.js"
+  },
+  "scripts": {
+    "postinstall": "node ./install.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/farrelaby/dirsweep.git"
+  },
+  "keywords": [
+    "tui",
+    "disk-cleanup",
+    "node_modules",
+    "developer-tools",
+    "cli"
+  ],
+  "author": "farrelaby",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/farrelaby/dirsweep/issues"
+  },
+  "homepage": "https://github.com/farrelaby/dirsweep",
+  "files": [
+    "bin.js",
+    "install.js"
+  ],
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ]
+}

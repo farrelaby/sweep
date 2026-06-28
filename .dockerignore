@@ -1,0 +1,7 @@
+target/
+.git/
+.gitignore
+*.md
+npm/
+install.sh
+.github/
