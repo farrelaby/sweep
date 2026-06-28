@@ -35,10 +35,12 @@ case "$OS" in
       TARGET="aarch64-unknown-linux-gnu"
     fi
     ;;
-  darwin) TARGET="x86_64-apple-darwin"
-    if [ "$ARCH" = "aarch64" ]; then
-      TARGET="aarch64-apple-darwin"
+  darwin)
+    if [ "$ARCH" != "aarch64" ]; then
+      echo "Error: Only Apple Silicon (aarch64) macOS is supported. For Intel Macs, use 'cargo install dirsweep'."
+      exit 1
     fi
+    TARGET="aarch64-apple-darwin"
     ;;
   *)
     echo "Error: Unsupported OS: $OS"
