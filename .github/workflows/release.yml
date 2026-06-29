@@ -109,7 +109,8 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           sed -i "s/^version = \".*\"/version = \"$VERSION\"/" Cargo.toml
 
-      - run: cargo check  # regenerates Cargo.lock with new version
+      - run: cargo check
+      - run: cargo generate-lockfile
       - run: cargo publish --locked
 
   publish-npm:
