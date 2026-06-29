@@ -13,7 +13,7 @@ pub enum AppPhase {
     Deleting,
     ConfirmQuit,
     OrderDialog,
-    Quit
+    Quit,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -178,12 +178,7 @@ impl AppState {
         let unassigned: Vec<&ScannedDir> = output
             .target_dirs
             .iter()
-            .filter(|d| {
-                !output
-                    .projects
-                    .iter()
-                    .any(|p| p.children.contains(&d.path))
-            })
+            .filter(|d| !output.projects.iter().any(|p| p.children.contains(&d.path)))
             .collect();
 
         if !unassigned.is_empty() {
@@ -220,14 +215,25 @@ impl AppState {
             }
         }
 
-        self.sizes_total = tree.iter().filter(|e| matches!(e, TreeEntry::TargetDir { .. })).count();
+        self.sizes_total = tree
+            .iter()
+            .filter(|e| matches!(e, TreeEntry::TargetDir { .. }))
+            .count();
         self.sizes_found = 0;
         self.sizes_complete = false;
         self.tree = tree;
         self.errors = output.errors;
-        self.total_reclaimable = self.tree.iter().filter_map(|e| {
-            if let TreeEntry::TargetDir { size, .. } = e { Some(*size) } else { None }
-        }).sum();
+        self.total_reclaimable = self
+            .tree
+            .iter()
+            .filter_map(|e| {
+                if let TreeEntry::TargetDir { size, .. } = e {
+                    Some(*size)
+                } else {
+                    None
+                }
+            })
+            .sum();
         self.rebuild_target_index();
         self.clamp_index();
     }
@@ -367,21 +373,33 @@ impl AppState {
                     children.sort_by(|a, b| {
                         let ka = name_order_key(a);
                         let kb = name_order_key(b);
-                        if by == OrderBy::NameAsc { ka.cmp(kb) } else { kb.cmp(ka) }
+                        if by == OrderBy::NameAsc {
+                            ka.cmp(kb)
+                        } else {
+                            kb.cmp(ka)
+                        }
                     });
                 }
                 OrderBy::DateAsc | OrderBy::DateDesc => {
                     children.sort_by(|a, b| {
                         let ka = date_order_key(a);
                         let kb = date_order_key(b);
-                        if by == OrderBy::DateAsc { ka.cmp(&kb) } else { kb.cmp(&ka) }
+                        if by == OrderBy::DateAsc {
+                            ka.cmp(&kb)
+                        } else {
+                            kb.cmp(&ka)
+                        }
                     });
                 }
                 OrderBy::SizeAsc | OrderBy::SizeDesc => {
                     children.sort_by(|a, b| {
                         let ka = size_order_key(a);
                         let kb = size_order_key(b);
-                        if by == OrderBy::SizeAsc { ka.cmp(&kb) } else { kb.cmp(&ka) }
+                        if by == OrderBy::SizeAsc {
+                            ka.cmp(&kb)
+                        } else {
+                            kb.cmp(&ka)
+                        }
                     });
                 }
             }
@@ -398,28 +416,24 @@ impl AppState {
                 ordered_groups.sort_by(|a, b| {
                     let ka = group_name_key(&a[0]);
                     let kb = group_name_key(&b[0]);
-                    if by == OrderBy::NameAsc { ka.cmp(kb) } else { kb.cmp(ka) }
+                    if by == OrderBy::NameAsc {
+                        ka.cmp(kb)
+                    } else {
+                        kb.cmp(ka)
+                    }
                 });
             }
             OrderBy::DateAsc => {
-                ordered_groups.sort_by(|a, b| {
-                    group_min_date(a).cmp(&group_min_date(b))
-                });
+                ordered_groups.sort_by_key(|a| group_min_date(a));
             }
             OrderBy::DateDesc => {
-                ordered_groups.sort_by(|a, b| {
-                    group_max_date(b).cmp(&group_max_date(a))
-                });
+                ordered_groups.sort_by_key(|b| std::cmp::Reverse(group_max_date(b)));
             }
             OrderBy::SizeAsc => {
-                ordered_groups.sort_by(|a, b| {
-                    group_min_size(a).cmp(&group_min_size(b))
-                });
+                ordered_groups.sort_by_key(|a| group_min_size(a));
             }
             OrderBy::SizeDesc => {
-                ordered_groups.sort_by(|a, b| {
-                    group_max_size(b).cmp(&group_max_size(a))
-                });
+                ordered_groups.sort_by_key(|b| std::cmp::Reverse(group_max_size(b)));
             }
         }
 
@@ -658,7 +672,11 @@ mod tests {
 
         let mut state = AppState::new(PathBuf::from("/test"));
         state.build_tree(output);
-        assert_eq!(state.tree.len(), 0, "project with no children should be skipped");
+        assert_eq!(
+            state.tree.len(),
+            0,
+            "project with no children should be skipped"
+        );
     }
 
     #[test]

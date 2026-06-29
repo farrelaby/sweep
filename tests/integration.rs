@@ -72,8 +72,15 @@ fn test_scan_single_project_without_lockfile() {
     let output = dirsweep::scanner::scan(dir.path());
 
     // node_modules without a lock file should still be found
-    assert_eq!(output.target_dirs.len(), 1, "should find node_modules even without lock file");
-    assert!(output.projects.is_empty(), "no project detected without lock file");
+    assert_eq!(
+        output.target_dirs.len(),
+        1,
+        "should find node_modules even without lock file"
+    );
+    assert!(
+        output.projects.is_empty(),
+        "no project detected without lock file"
+    );
 }
 
 #[test]
@@ -83,14 +90,23 @@ fn test_mock_multi_project_scan() {
     // project-a: npm with node_modules + .next
     create_file(&dir.path().join("project-a/package-lock.json"), 100);
     create_dir(&dir.path().join("project-a/node_modules"));
-    create_file(&dir.path().join("project-a/node_modules/lodash/index.js"), 10_000_000);
+    create_file(
+        &dir.path().join("project-a/node_modules/lodash/index.js"),
+        10_000_000,
+    );
     create_dir(&dir.path().join("project-a/.next"));
-    create_file(&dir.path().join("project-a/.next/build-manifest.json"), 200_000);
+    create_file(
+        &dir.path().join("project-a/.next/build-manifest.json"),
+        200_000,
+    );
 
     // project-b: yarn with node_modules + vendor
     create_file(&dir.path().join("project-b/yarn.lock"), 100);
     create_dir(&dir.path().join("project-b/node_modules"));
-    create_file(&dir.path().join("project-b/node_modules/react/index.js"), 5_000_000);
+    create_file(
+        &dir.path().join("project-b/node_modules/react/index.js"),
+        5_000_000,
+    );
     create_dir(&dir.path().join("project-b/vendor"));
     create_file(&dir.path().join("project-b/vendor/jquery.js"), 1_000_000);
 
@@ -110,7 +126,11 @@ fn test_mock_multi_project_scan() {
         6,
         "should find 6 target dirs total"
     );
-    assert_eq!(output.projects.len(), 3, "should detect 3 projects with lock files");
+    assert_eq!(
+        output.projects.len(),
+        3,
+        "should detect 3 projects with lock files"
+    );
     assert!(output.errors.is_empty(), "no errors expected");
 
     // Verify project detection
@@ -120,25 +140,53 @@ fn test_mock_multi_project_scan() {
     assert!(project_names.contains(&"project-c"));
 
     // Verify package managers
-    let npm_project = output.projects.iter().find(|p| p.name == "project-a").unwrap();
+    let npm_project = output
+        .projects
+        .iter()
+        .find(|p| p.name == "project-a")
+        .unwrap();
     assert_eq!(npm_project.package_manager.as_deref(), Some("npm"));
 
-    let yarn_project = output.projects.iter().find(|p| p.name == "project-b").unwrap();
+    let yarn_project = output
+        .projects
+        .iter()
+        .find(|p| p.name == "project-b")
+        .unwrap();
     assert_eq!(yarn_project.package_manager.as_deref(), Some("yarn"));
 
-    let cargo_project = output.projects.iter().find(|p| p.name == "project-c").unwrap();
+    let cargo_project = output
+        .projects
+        .iter()
+        .find(|p| p.name == "project-c")
+        .unwrap();
     assert_eq!(cargo_project.package_manager.as_deref(), Some("cargo"));
 
     // Verify children per project
-    assert_eq!(npm_project.children.len(), 2, "project-a should have 2 children");
-    assert_eq!(yarn_project.children.len(), 2, "project-b should have 2 children");
-    assert_eq!(cargo_project.children.len(), 1, "project-c should have 1 child");
+    assert_eq!(
+        npm_project.children.len(),
+        2,
+        "project-a should have 2 children"
+    );
+    assert_eq!(
+        yarn_project.children.len(),
+        2,
+        "project-b should have 2 children"
+    );
+    assert_eq!(
+        cargo_project.children.len(),
+        1,
+        "project-c should have 1 child"
+    );
 
     // Verify sizes via scan_target_size (fast scan returns size=0)
-    let total: u64 = output.target_dirs.iter().map(|d| {
-        let (size, _) = dirsweep::scanner::scan_target_size(&d.path).unwrap();
-        size
-    }).sum();
+    let total: u64 = output
+        .target_dirs
+        .iter()
+        .map(|d| {
+            let (size, _) = dirsweep::scanner::scan_target_size(&d.path).unwrap();
+            size
+        })
+        .sum();
     assert_eq!(total, 24_300_000, "total size should be sum of all files");
 }
 
@@ -166,9 +214,11 @@ fn test_mock_tree_building() {
     );
 
     // Check that exactly 2 TargetDir entries exist for node_modules and .next
-    let target_count = state.tree.iter().filter(|e| {
-        matches!(e, dirsweep::app::TreeEntry::TargetDir { .. })
-    }).count();
+    let target_count = state
+        .tree
+        .iter()
+        .filter(|e| matches!(e, dirsweep::app::TreeEntry::TargetDir { .. }))
+        .count();
     assert_eq!(target_count, 2, "should have 2 target dirs");
 
     let has_node_modules = state.tree.iter().any(|e| {
@@ -197,7 +247,10 @@ fn test_mock_select_and_deselect() {
     state.build_tree(output);
 
     // Find indices of target dirs in the tree
-    let indices: Vec<usize> = state.tree.iter().enumerate()
+    let indices: Vec<usize> = state
+        .tree
+        .iter()
+        .enumerate()
         .filter(|(_, e)| matches!(e, dirsweep::app::TreeEntry::TargetDir { .. }))
         .map(|(i, _)| i)
         .collect();

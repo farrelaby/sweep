@@ -9,7 +9,7 @@ use clap::Parser;
 use crossterm::{
     event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers},
     execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
 use ratatui::{Terminal, backend::CrosstermBackend};
 
@@ -26,7 +26,10 @@ enum SizeUpdate {
 }
 
 #[derive(Parser, Debug)]
-#[command(name = "dirsweep", about = "Find and remove bloated project directories")]
+#[command(
+    name = "dirsweep",
+    about = "Find and remove bloated project directories"
+)]
 struct Cli {
     #[arg(short, long, default_value = ".")]
     dir: PathBuf,
@@ -54,7 +57,11 @@ fn main() -> io::Result<()> {
     terminal.show_cursor()?;
 
     if state.total_deleted_count > 0 {
-        let noun = if state.total_deleted_count == 1 { "directory" } else { "directories" };
+        let noun = if state.total_deleted_count == 1 {
+            "directory"
+        } else {
+            "directories"
+        };
         let size_str = humansize::format_size(state.total_deleted_size, humansize::BINARY);
         println!(
             "Sweeped {} {} ({} reclaimed)",
@@ -94,7 +101,12 @@ fn run_app(
         for path in target_paths {
             match dirsweep::scanner::scan_target_size(&path) {
                 Ok((size, last_modified)) => {
-                    let _ = tx.send(SizeUpdate::Update { path, size, last_modified, error: None });
+                    let _ = tx.send(SizeUpdate::Update {
+                        path,
+                        size,
+                        last_modified,
+                        error: None,
+                    });
                 }
                 Err(e) => {
                     let _ = tx.send(SizeUpdate::Update {

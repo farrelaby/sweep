@@ -85,8 +85,7 @@ fn render_main(state: &mut AppState, frame: &mut Frame, area: Rect) {
                 render_browsing(state, frame, area);
             } else {
                 let [tree_area, error_area] =
-                    Layout::vertical([Constraint::Min(0), Constraint::Length(3)])
-                        .areas(area);
+                    Layout::vertical([Constraint::Min(0), Constraint::Length(3)]).areas(area);
                 render_browsing(state, frame, tree_area);
                 render_errors(state, frame, error_area);
             }
@@ -228,9 +227,7 @@ fn render_browsing(state: &mut AppState, frame: &mut Frame, area: Rect) {
                     " "
                 };
                 let prefix = if *is_last { "\u{2514}" } else { "\u{251C}" };
-                let display_path = path
-                    .strip_prefix(&state.scan_path)
-                    .unwrap_or(path);
+                let display_path = path.strip_prefix(&state.scan_path).unwrap_or(path);
                 let path_str = display_path.to_string_lossy().to_string();
                 let sized_str = humansize::format_size(*size, humansize::BINARY);
                 let modified = relative_time(*last_modified);
@@ -244,23 +241,16 @@ fn render_browsing(state: &mut AppState, frame: &mut Frame, area: Rect) {
                 };
 
                 if use_alignment {
-                    let padded_path =
-                        format!("{:width$}", path_str, width = max_path_width + 2);
+                    let padded_path = format!("{:width$}", path_str, width = max_path_width + 2);
                     let text = Line::from(vec![
                         Span::raw(format!(" {} ", prefix)),
                         Span::styled(format!("[{}]", checked), selected_style),
                         Span::raw(" "),
                         Span::styled(padded_path, selected_style),
                         Span::raw(" "),
-                        Span::styled(
-                            sized_str,
-                            Style::default().fg(palette::SIZE),
-                        ),
+                        Span::styled(sized_str, Style::default().fg(palette::SIZE)),
                         Span::raw(" "),
-                        Span::styled(
-                            modified,
-                            Style::default().fg(palette::TIME),
-                        ),
+                        Span::styled(modified, Style::default().fg(palette::TIME)),
                     ]);
                     ListItem::new(text)
                 } else {
@@ -270,15 +260,9 @@ fn render_browsing(state: &mut AppState, frame: &mut Frame, area: Rect) {
                         Span::raw(" "),
                         Span::styled(path_str, selected_style),
                         Span::raw(" "),
-                        Span::styled(
-                            sized_str,
-                            Style::default().fg(palette::SIZE),
-                        ),
+                        Span::styled(sized_str, Style::default().fg(palette::SIZE)),
                         Span::raw(" "),
-                        Span::styled(
-                            modified,
-                            Style::default().fg(palette::TIME),
-                        ),
+                        Span::styled(modified, Style::default().fg(palette::TIME)),
                     ]);
                     ListItem::new(text)
                 }
@@ -357,7 +341,10 @@ fn render_confirm_dialog(state: &AppState, frame: &mut Frame, area: Rect) {
             let size_str = humansize::format_size(*size, humansize::BINARY);
             lines.push(Line::from(vec![
                 Span::styled("  \u{25CF} ", Style::default().fg(palette::SELECTED)),
-                Span::styled(dir_name.to_string(), Style::default().fg(palette::DIALOG_TEXT)),
+                Span::styled(
+                    dir_name.to_string(),
+                    Style::default().fg(palette::DIALOG_TEXT),
+                ),
                 Span::raw(" "),
                 Span::styled(
                     format!("({})", size_str),
@@ -378,20 +365,35 @@ fn render_confirm_dialog(state: &AppState, frame: &mut Frame, area: Rect) {
     lines.push(Line::from(""));
 
     let (dry_fg, trash_fg, permanent_fg) = match state.delete_preference {
-        DeletePreference::DryRun => (palette::SELECTED, palette::DIALOG_HINT, palette::DIALOG_HINT),
-        DeletePreference::Trash => (palette::DIALOG_HINT, palette::SELECTED, palette::DIALOG_HINT),
-        DeletePreference::Permanent => (palette::DIALOG_HINT, palette::DIALOG_HINT, palette::SELECTED),
+        DeletePreference::DryRun => (
+            palette::SELECTED,
+            palette::DIALOG_HINT,
+            palette::DIALOG_HINT,
+        ),
+        DeletePreference::Trash => (
+            palette::DIALOG_HINT,
+            palette::SELECTED,
+            palette::DIALOG_HINT,
+        ),
+        DeletePreference::Permanent => (
+            palette::DIALOG_HINT,
+            palette::DIALOG_HINT,
+            palette::SELECTED,
+        ),
     };
 
-    lines.push(Line::from(vec![
-        Span::styled("  Dry run (show only)", dry_fg),
-    ]));
-    lines.push(Line::from(vec![
-        Span::styled("  Trash (move to trash)", trash_fg),
-    ]));
-    lines.push(Line::from(vec![
-        Span::styled("  Permanent delete", permanent_fg),
-    ]));
+    lines.push(Line::from(vec![Span::styled(
+        "  Dry run (show only)",
+        dry_fg,
+    )]));
+    lines.push(Line::from(vec![Span::styled(
+        "  Trash (move to trash)",
+        trash_fg,
+    )]));
+    lines.push(Line::from(vec![Span::styled(
+        "  Permanent delete",
+        permanent_fg,
+    )]));
     lines.push(Line::from(""));
     lines.push(Line::from(Span::styled(
         " [Enter] confirm  [Esc] cancel  [\u{2191}/\u{2193}] toggle mode",
@@ -474,7 +476,11 @@ fn render_deleting(state: &AppState, frame: &mut Frame, area: Rect) {
         .map(|n| n.to_string_lossy().to_string())
         .unwrap_or_default();
 
-    let progress = format!("{}/{}", state.deleting_index + 1, state.deleting_paths.len());
+    let progress = format!(
+        "{}/{}",
+        state.deleting_index + 1,
+        state.deleting_paths.len()
+    );
 
     let lines = vec![
         Line::from(Span::styled(
@@ -510,60 +516,52 @@ fn render_deleting(state: &AppState, frame: &mut Frame, area: Rect) {
 fn render_status_bar(state: &AppState, frame: &mut Frame, area: Rect) {
     if state.phase == AppPhase::Browsing {
         let (hints, extra) = if let Some(ref summary) = state.delete_result_summary {
-                let text = Line::from(vec![
-                    Span::styled(
-                        format!(" {}", summary),
-                        Style::default()
-                            .fg(palette::NOTIFY)
-                            .add_modifier(Modifier::BOLD),
-                    ),
-                    Span::raw(" "),
-                    Span::styled(
-                        format!("  {}/{}", state.list_index + 1, state.tree.len()),
-                        Style::default().fg(palette::STATUS),
-                    ),
-                ]);
-                let status = Paragraph::new(text);
-                frame.render_widget(status, area);
-                return;
-            } else {
-                let hints = " [Space] toggle  [a] all  [d] none  [Enter] delete  [o] order-by  [q] quit";
-
-                let mut extra_parts = Vec::new();
-                if let Some(ref size_status) = state.sizes_status() {
-                    extra_parts.push(size_status.clone());
-                }
-                if state.selection_count() > 0 {
-                    extra_parts.push(format!(
-                        "{} selected",
-                        state.selection_count()
-                    ));
-                    extra_parts.push(humansize::format_size(
-                        state.total_selected_size,
-                        humansize::BINARY,
-                    ));
-                }
-                extra_parts.push(format!("{}/{}", state.list_index + 1, state.tree.len()));
-                let extra = format!("  {}", extra_parts.join(" | "));
-
-                (hints, extra)
-            };
-
             let text = Line::from(vec![
                 Span::styled(
-                    hints,
-                    Style::default().fg(palette::STATUS),
+                    format!(" {}", summary),
+                    Style::default()
+                        .fg(palette::NOTIFY)
+                        .add_modifier(Modifier::BOLD),
                 ),
                 Span::raw(" "),
                 Span::styled(
-                    extra,
+                    format!("  {}/{}", state.list_index + 1, state.tree.len()),
                     Style::default().fg(palette::STATUS),
                 ),
             ]);
-
             let status = Paragraph::new(text);
             frame.render_widget(status, area);
-        }
+            return;
+        } else {
+            let hints =
+                " [Space] toggle  [a] all  [d] none  [Enter] delete  [o] order-by  [q] quit";
+
+            let mut extra_parts = Vec::new();
+            if let Some(ref size_status) = state.sizes_status() {
+                extra_parts.push(size_status.clone());
+            }
+            if state.selection_count() > 0 {
+                extra_parts.push(format!("{} selected", state.selection_count()));
+                extra_parts.push(humansize::format_size(
+                    state.total_selected_size,
+                    humansize::BINARY,
+                ));
+            }
+            extra_parts.push(format!("{}/{}", state.list_index + 1, state.tree.len()));
+            let extra = format!("  {}", extra_parts.join(" | "));
+
+            (hints, extra)
+        };
+
+        let text = Line::from(vec![
+            Span::styled(hints, Style::default().fg(palette::STATUS)),
+            Span::raw(" "),
+            Span::styled(extra, Style::default().fg(palette::STATUS)),
+        ]);
+
+        let status = Paragraph::new(text);
+        frame.render_widget(status, area);
+    }
 }
 
 fn render_order_dialog(state: &AppState, frame: &mut Frame, area: Rect) {

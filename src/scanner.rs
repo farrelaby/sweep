@@ -101,9 +101,7 @@ pub fn scan(base_path: &Path) -> ScanOutput {
 
         for entry in top_level.flatten() {
             let name = entry.file_name().to_string_lossy().to_string();
-            if entry.file_type().is_ok_and(|ft| ft.is_dir())
-                && config::is_known_target(&name)
-            {
+            if entry.file_type().is_ok_and(|ft| ft.is_dir()) && config::is_known_target(&name) {
                 let target_path = entry.path();
                 target_dirs.push(ScannedDir {
                     path: target_path.clone(),
@@ -128,8 +126,7 @@ pub fn scan(base_path: &Path) -> ScanOutput {
         })
         .flatten()
         .filter(|e| {
-            e.file_type().is_dir()
-                && config::is_known_target(&e.file_name().to_string_lossy())
+            e.file_type().is_dir() && config::is_known_target(&e.file_name().to_string_lossy())
         })
         .map(|e| e.path().to_path_buf())
         .collect();
@@ -206,12 +203,14 @@ fn scan_target(path: &Path) -> Result<ScannedDir, std::io::Error> {
 
     let dt = last_modified
         .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
-        .and_then(|d| {
-            DateTime::from_timestamp(d.as_secs() as i64, d.subsec_nanos())
-        })
+        .and_then(|d| DateTime::from_timestamp(d.as_secs() as i64, d.subsec_nanos()))
         .unwrap_or(DateTime::UNIX_EPOCH);
 
-    let error = if errors.is_empty() { None } else { Some(errors.join("; ")) };
+    let error = if errors.is_empty() {
+        None
+    } else {
+        Some(errors.join("; "))
+    };
 
     Ok(ScannedDir {
         path: path.to_path_buf(),
@@ -253,10 +252,7 @@ mod tests {
 
         let output = scan(dir.path());
         assert_eq!(output.target_dirs.len(), 1);
-        assert_eq!(
-            output.target_dirs[0].path,
-            project.join("node_modules")
-        );
+        assert_eq!(output.target_dirs[0].path, project.join("node_modules"));
         // Fast scan returns size=0; sizes computed separately via scan_target_size
         assert_eq!(output.target_dirs[0].size, 0);
     }
