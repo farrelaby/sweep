@@ -3,19 +3,6 @@ set -eu
 
 VERSION="${VERSION:-latest}"
 REPO="farrelaby/dirsweep"
-INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
-
-if [ "$VERSION" = "latest" ]; then
-  if command -v jq > /dev/null 2>&1; then
-    VERSION=$(curl -sL "https://api.github.com/repos/$REPO/releases/latest" | jq -r '.tag_name' | sed 's/^v//')
-  else
-    VERSION=$(curl -sL "https://api.github.com/repos/$REPO/releases/latest" | grep -o '"tag_name": *"v[^"]*"' | sed 's/.*"v\(.*\)"/\1/')
-  fi
-  if [ -z "$VERSION" ]; then
-    echo "Error: Failed to fetch latest version from GitHub"
-    exit 1
-  fi
-fi
 
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)
@@ -30,7 +17,9 @@ case "$ARCH" in
 esac
 
 case "$OS" in
-  linux) TARGET="x86_64-unknown-linux-gnu"
+  linux)
+    TARGET="x86_64-unknown-linux-gnu"
+    DEFAULT_DIR="${HOME}/.local/bin"
     if [ "$ARCH" = "aarch64" ]; then
       TARGET="aarch64-unknown-linux-gnu"
     fi
@@ -41,12 +30,27 @@ case "$OS" in
       exit 1
     fi
     TARGET="aarch64-apple-darwin"
+    DEFAULT_DIR="/usr/local/bin"
     ;;
   *)
     echo "Error: Unsupported OS: $OS"
     exit 1
     ;;
 esac
+
+INSTALL_DIR="${INSTALL_DIR:-$DEFAULT_DIR}"
+
+if [ "$VERSION" = "latest" ]; then
+  if command -v jq > /dev/null 2>&1; then
+    VERSION=$(curl -sL "https://api.github.com/repos/$REPO/releases/latest" | jq -r '.tag_name' | sed 's/^v//')
+  else
+    VERSION=$(curl -sL "https://api.github.com/repos/$REPO/releases/latest" | grep -o '"tag_name": *"v[^"]*"' | sed 's/.*"v\(.*\)"/\1/')
+  fi
+  if [ -z "$VERSION" ]; then
+    echo "Error: Failed to fetch latest version from GitHub"
+    exit 1
+  fi
+fi
 
 URL="https://github.com/$REPO/releases/download/v$VERSION/dirsweep-v$VERSION-$TARGET.tar.gz"
 TMP_DIR=$(mktemp -d)
@@ -81,6 +85,21 @@ if [ ! -f "$TMP_DIR/dirsweep" ]; then
 fi
 
 chmod +x "$TMP_DIR/dirsweep"
-mv "$TMP_DIR/dirsweep" "$INSTALL_DIR/dirsweep"
+
+if [ ! -d "$INSTALL_DIR" ]; then
+  mkdir -p "$INSTALL_DIR"
+fi
+
+if ! mv "$TMP_DIR/dirsweep" "$INSTALL_DIR/dirsweep" 2>/dev/null; then
+  if command -v sudo > /dev/null 2>&1; then
+    if ! sudo mv "$TMP_DIR/dirsweep" "$INSTALL_DIR/dirsweep"; then
+      echo "Error: Failed to install. Check permissions."
+      exit 1
+    fi
+  else
+    echo "Error: Permission denied. Try: sudo mv $TMP_DIR/dirsweep $INSTALL_DIR/dirsweep"
+    exit 1
+  fi
+fi
 
 echo "dirsweep v$VERSION installed to $INSTALL_DIR/dirsweep"
