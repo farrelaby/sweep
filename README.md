@@ -31,8 +31,10 @@ cargo install dirsweep
 #### Linux
 
 ```bash
-curl -sSfL https://github.com/farrelaby/dirsweep/raw/main/install.sh | sudo sh
+curl -sSfL https://github.com/farrelaby/dirsweep/raw/main/install.sh | sh
 ```
+
+Installs to `~/.local/bin` (no sudo needed).
 
 #### macOS
 
@@ -40,9 +42,15 @@ curl -sSfL https://github.com/farrelaby/dirsweep/raw/main/install.sh | sudo sh
 curl -sSfL https://github.com/farrelaby/dirsweep/raw/main/install.sh | sh
 ```
 
+Installs to `/usr/local/bin` (may prompt for sudo).
+
 ### Windows
 
-No shell script available. Use [npm](#npm) or [cargo](#cargo).
+```powershell
+irm https://github.com/farrelaby/dirsweep/raw/main/install.ps1 | iex
+```
+
+Installs to `%USERPROFILE%\.local\bin` and adds to user PATH.
 
 ## TUI preview
 
