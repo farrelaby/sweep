@@ -52,6 +52,16 @@ irm https://github.com/farrelaby/dirsweep/raw/main/install.ps1 | iex
 
 Installs to `%USERPROFILE%\.local\bin` and adds to user PATH.
 
+## Usage
+
+```bash
+# Scan current directory
+dirsweep
+
+# Scan a specific directory
+dirsweep --dir /path/to/projects
+```
+
 ## TUI preview
 
 ```
@@ -114,13 +124,3 @@ Installs to `%USERPROFILE%\.local\bin` and adds to user PATH.
 | `Cargo.toml` with `members` | Rust workspace |
 
 Root-level `node_modules` in monorepos are highlighted as they may be shared across packages — deleting them could break the entire workspace.
-
-## Usage
-
-```bash
-# Scan current directory
-dirsweep
-
-# Scan a specific directory
-dirsweep --dir /path/to/projects
-```
