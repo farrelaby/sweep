@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: ["*"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    name: ${{ matrix.step.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        step:
+          - name: Format
+            command: cargo fmt --check
+          - name: Clippy
+            command: cargo clippy -- -D warnings
+          - name: Test
+            command: cargo test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - run: ${{ matrix.step.command }}
