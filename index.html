@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>dirsweep — reclaim your disk space</title>
+    <link rel="stylesheet" href="style.css" />
+    <meta
+      name="description"
+      content="A TUI tool for finding and removing bloated project directories that waste disk space."
+    />
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <div class="logo">dirsweep</div>
+        <p class="tagline">Find and delete bloated directories in seconds</p>
+      </div>
+    </header>
+
+    <section id="demo">
+      <div class="container">
+        <div class="terminal">
+          <div class="terminal-bar">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <span class="terminal-title">dirsweep</span>
+          </div>
+          <pre><code> dirsweep — /home/user/projects  |  6.8 GiB reclaimable  |  scan 0.6s
+
+   my-app (pnpm)
+ ▶ └ [●] node_modules    1.2 GiB   3 days ago
+     [●] dist            800 MiB   2 days ago
+   rust-project (cargo)
+   └ [●] target          4.5 GiB   10 days ago
+   my-other-app (npm)
+     [ ] .next           350 MiB   just now
+
+ [Space] toggle  [a] all  [d] none  [Enter] delete  [q] quit  3 selected | 6.50 GiB | 1/6</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="how">
+      <div class="container">
+        <h2>How it works</h2>
+        <div class="steps">
+          <div class="step">
+            <span class="step-num">1</span>
+            <h3>Scan</h3>
+            <p>
+              Point dirsweep at your projects folder. It detects language and
+              package manager for every directory.
+            </p>
+          </div>
+          <div class="step">
+            <span class="step-num">2</span>
+            <h3>Browse</h3>
+            <p>
+              See a grouped tree of bloated directories — node_modules, target,
+              .next, and more — sorted by size.
+            </p>
+          </div>
+          <div class="step">
+            <span class="step-num">3</span>
+            <h3>Sweep</h3>
+            <p>
+              Toggle what you want gone, hit Enter, and reclaim your disk space.
+              Safe by default (trash), permanent if you want it.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="install">
+      <div class="container">
+        <h2>Install</h2>
+        <div class="install-grid">
+          <div class="install-card">
+            <div class="install-label">
+              <span class="install-icon">📦</span>
+              <h3>npm</h3>
+            </div>
+            <pre><code>npx dirsweep</code></pre>
+          </div>
+          <div class="install-card">
+            <div class="install-label">
+              <span class="install-icon">🦀</span>
+              <h3>cargo</h3>
+            </div>
+            <pre><code>cargo install dirsweep</code></pre>
+          </div>
+          <div class="install-card">
+            <div class="install-label">
+              <span class="install-icon">🐧</span>
+              <h3>Linux / macOS</h3>
+            </div>
+            <pre><code>curl -sSfL https://github.com/farrelaby/dirsweep/raw/main/install.sh | sh</code></pre>
+          </div>
+          <div class="install-card">
+            <div class="install-label">
+              <span class="install-icon">🪟</span>
+              <h3>Windows</h3>
+            </div>
+            <pre><code>irm https://github.com/farrelaby/dirsweep/raw/main/install.ps1 | iex</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="targets">
+      <div class="container">
+        <h2>Supported targets</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Directory</th>
+              <th>Language / Framework</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>node_modules</code></td>
+              <td>Node.js</td>
+            </tr>
+            <tr>
+              <td><code>target</code></td>
+              <td>Rust, Maven (Java)</td>
+            </tr>
+            <tr>
+              <td><code>.next</code></td>
+              <td>Next.js</td>
+            </tr>
+            <tr>
+              <td><code>__pycache__</code></td>
+              <td>Python</td>
+            </tr>
+            <tr>
+              <td><code>.venv</code> / <code>venv</code></td>
+              <td>Python virtual environments</td>
+            </tr>
+            <tr>
+              <td><code>dist</code> / <code>build</code></td>
+              <td>JS/TS bundlers, Gradle (Java/Kotlin)</td>
+            </tr>
+            <tr>
+              <td><code>vendor</code></td>
+              <td>Go, PHP (Composer)</td>
+            </tr>
+            <tr>
+              <td><code>Pods</code></td>
+              <td>iOS (CocoaPods)</td>
+            </tr>
+            <tr>
+              <td><code>.tox</code></td>
+              <td>Python (tox)</td>
+            </tr>
+            <tr>
+              <td><code>out</code></td>
+              <td>Kotlin/Java</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="keys">
+      <div class="container">
+        <h2>Keybindings</h2>
+        <div class="keygrid">
+          <div class="key-item"><kbd>Space</kbd> toggle selection</div>
+          <div class="key-item"><kbd>a</kbd> select all</div>
+          <div class="key-item"><kbd>d</kbd> deselect all</div>
+          <div class="key-item"><kbd>Enter</kbd> confirm delete</div>
+          <div class="key-item"><kbd>j</kbd> / <kbd>k</kbd> navigate</div>
+          <div class="key-item"><kbd>o</kbd> order by</div>
+          <div class="key-item"><kbd>q</kbd> quit</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container footer-rows">
+        <div class="footer-row">
+          <a href="https://github.com/farrelaby/dirsweep">GitHub</a>
+          <span class="sep">&bull;</span>
+          <span
+            >Made with ❤️ by
+            <a href="https://www.linkedin.com/in/farrelaby">Farrel</a> (<a
+              href="mailto:farrel.abyansyah@gmail.com"
+              >Feel free to contact me!</a
+            >)</span
+          >
+        </div>
+        <div class="footer-sep"></div>
+        <div class="footer-row footer-muted">
+          <span>MIT License</span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
