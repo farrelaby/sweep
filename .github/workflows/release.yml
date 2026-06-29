@@ -127,12 +127,13 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
 
-      - name: Sync version + include LICENSE
+      - name: Sync version + include assets
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           cd npm
           jq --arg v "$VERSION" '.version = $v' package.json > tmp.json && mv tmp.json package.json
           cp ../LICENSE .
+          cp ../README.md .
 
       - name: Publish
         run: |
