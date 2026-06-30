@@ -1,0 +1,38 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out this form so we can investigate.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened? What did you expect to happen?
+      placeholder: Describe the bug clearly.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps to reproduce the behavior.
+      placeholder: |
+        1. Run `dirsweep`
+        2. ...
+        3. Select a directory
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, terminal, and dirsweep version.
+      placeholder: |
+        - OS: macOS 15 / Ubuntu 24.04 / Windows 11
+        - Terminal: iTerm2 / Ghostty / Windows Terminal
+        - dirsweep: 0.1.2
+    validations:
+      required: true
