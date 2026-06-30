@@ -115,10 +115,9 @@ pub fn scan(base_path: &Path) -> ScanOutput {
         }
     }
 
-    // Pass 3: Shallow walk for orphan targets (no lock file parent).
+    // Pass 3: Recursive walk for orphan targets (no lock file parent).
     let mut orphan_targets: Vec<PathBuf> = WalkDir::new(base_path)
         .follow_links(false)
-        .max_depth(2)
         .into_iter()
         .filter_entry(|e| {
             let name = e.file_name().to_string_lossy();
@@ -132,7 +131,7 @@ pub fn scan(base_path: &Path) -> ScanOutput {
         .collect();
 
     orphan_targets.sort();
-    orphan_targets.dedup_by(|a, b| b.starts_with(a));
+    orphan_targets.dedup_by(|a, b| a.starts_with(b));
 
     for target_path in orphan_targets {
         let is_associated = projects.iter().any(|p| p.children.contains(&target_path));
@@ -327,5 +326,36 @@ mod tests {
 
         let (size, _last_modified) = scan_target_size(&target).unwrap();
         assert!(size >= 1024);
+    }
+
+    #[test]
+    fn test_scan_finds_deep_orphan_targets() {
+        let dir = create_test_dir();
+        let project = dir.path().join("project");
+        create_file(&project.join("package-lock.json"), 50);
+        create_dir(&project.join("node_modules"));
+        create_file(&project.join("node_modules/pkg/index.js"), 1024);
+        // Deep orphan: inside a non-project subdirectory
+        create_dir(&project.join("test"));
+        create_dir(&project.join("test").join("node_modules"));
+        create_file(&project.join("test/node_modules/deep-pkg/index.js"), 2048);
+        // Root-level orphan
+        create_dir(&dir.path().join("node_modules"));
+        create_file(&dir.path().join("node_modules/root-pkg/index.js"), 512);
+        // Nested node_modules inside root node_modules — should not be a separate target
+        create_dir(&dir.path().join("node_modules/dep_1"));
+        create_dir(&dir.path().join("node_modules/dep_1/node_modules"));
+        create_file(
+            &dir.path()
+                .join("node_modules/dep_1/node_modules/dep_1_deep/index.js"),
+            256,
+        );
+
+        let output = scan(dir.path());
+        let paths: Vec<_> = output.target_dirs.iter().map(|d| d.path.clone()).collect();
+        assert_eq!(output.target_dirs.len(), 3);
+        assert!(paths.contains(&project.join("node_modules")));
+        assert!(paths.contains(&project.join("test/node_modules")));
+        assert!(paths.contains(&dir.path().join("node_modules")));
     }
 }
