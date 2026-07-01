@@ -297,3 +297,154 @@ pub fn cmd_uninstall(force: bool) -> Result<(), Box<dyn std::error::Error>> {
     println!("dirsweep has been uninstalled.");
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn test_parse_version_with_prefix() {
+        assert_eq!(parse_version("v0.1.3"), Some("0.1.3".to_string()));
+    }
+
+    #[test]
+    fn test_parse_version_without_prefix() {
+        assert_eq!(parse_version("0.1.3"), None);
+    }
+
+    #[test]
+    fn test_parse_version_just_prefix() {
+        assert_eq!(parse_version("v"), Some("".to_string()));
+    }
+
+    #[test]
+    fn test_parse_version_extra_segments() {
+        assert_eq!(parse_version("v1.2.3.4"), Some("1.2.3.4".to_string()));
+    }
+
+    #[test]
+    fn test_version_is_newer_patch_bump() {
+        assert!(version_is_newer("0.1.2", "0.1.3"));
+    }
+
+    #[test]
+    fn test_version_is_newer_older() {
+        assert!(!version_is_newer("0.1.3", "0.1.2"));
+    }
+
+    #[test]
+    fn test_version_is_newer_same() {
+        assert!(!version_is_newer("0.1.3", "0.1.3"));
+    }
+
+    #[test]
+    fn test_version_is_newer_minor_bump() {
+        assert!(version_is_newer("0.1.2", "0.2.0"));
+    }
+
+    #[test]
+    fn test_version_is_newer_major_bump() {
+        assert!(version_is_newer("0.9.9", "1.0.0"));
+    }
+
+    #[test]
+    fn test_parse_checksums_single_line() {
+        let content = "abc123  dirsweep-v0.1-linux.tar.gz\n";
+        let result = parse_checksums(content);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result.get("dirsweep-v0.1-linux.tar.gz").unwrap(), "abc123");
+    }
+
+    #[test]
+    fn test_parse_checksums_multiple_lines() {
+        let content = "abc123  dirsweep-v0.1-linux.tar.gz\ndef456  dirsweep-v0.1-macos.tar.gz\n";
+        let result = parse_checksums(content);
+        assert_eq!(result.len(), 2);
+        assert_eq!(result.get("dirsweep-v0.1-linux.tar.gz").unwrap(), "abc123");
+        assert_eq!(result.get("dirsweep-v0.1-macos.tar.gz").unwrap(), "def456");
+    }
+
+    #[test]
+    fn test_parse_checksums_empty() {
+        let content = "";
+        let result = parse_checksums(content);
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn test_find_asset_url_matching() {
+        let assets = vec![
+            json!({
+                "name": "dirsweep-v0.1.3-x86_64-unknown-linux-gnu.tar.gz",
+                "browser_download_url": "https://example.com/linux.tar.gz"
+            }),
+            json!({
+                "name": "checksums.txt",
+                "browser_download_url": "https://example.com/checksums.txt"
+            }),
+        ];
+        let result = find_asset_url(&assets, "x86_64-unknown-linux-gnu");
+        assert_eq!(result, Some("https://example.com/linux.tar.gz".to_string()));
+    }
+
+    #[test]
+    fn test_find_asset_url_no_match() {
+        let assets = vec![json!({
+            "name": "dirsweep-v0.1.3-aarch64-apple-darwin.tar.gz",
+            "browser_download_url": "https://example.com/macos.tar.gz"
+        })];
+        let result = find_asset_url(&assets, "x86_64-unknown-linux-gnu");
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_find_asset_url_skips_txt() {
+        let assets = vec![json!({
+            "name": "checksums.txt",
+            "browser_download_url": "https://example.com/checksums.txt"
+        })];
+        let result = find_asset_url(&assets, "checksums");
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_find_checksums_url_present() {
+        let assets = vec![
+            json!({
+                "name": "dirsweep-v0.1.3-linux.tar.gz",
+                "browser_download_url": "https://example.com/linux.tar.gz"
+            }),
+            json!({
+                "name": "checksums.txt",
+                "browser_download_url": "https://example.com/checksums.txt"
+            }),
+        ];
+        let result = find_checksums_url(&assets);
+        assert_eq!(
+            result,
+            Some("https://example.com/checksums.txt".to_string())
+        );
+    }
+
+    #[test]
+    fn test_find_checksums_url_not_present() {
+        let assets = vec![json!({
+            "name": "dirsweep-v0.1.3-linux.tar.gz",
+            "browser_download_url": "https://example.com/linux.tar.gz"
+        })];
+        let result = find_checksums_url(&assets);
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_detect_target_returns_non_empty() {
+        let target = detect_target();
+        assert!(!target.is_empty());
+    }
+
+    #[test]
+    fn test_prompt_confirm_force_true() {
+        assert!(prompt_confirm("test message", true));
+    }
+}
