@@ -60,6 +60,13 @@ dirsweep
 
 # Scan a specific directory
 dirsweep --dir /path/to/projects
+
+# Update to latest version
+dirsweep update
+
+# Uninstall
+dirsweep uninstall
+dirsweep uninstall --force  # skip confirmation
 ```
 
 ## TUI preview
