@@ -5,7 +5,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use chrono::{DateTime, Utc};
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use crossterm::{
     event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers},
     execute,
@@ -31,42 +31,77 @@ enum SizeUpdate {
     about = "Find and remove bloated project directories"
 )]
 struct Cli {
+    #[command(subcommand)]
+    command: Option<Commands>,
+
+    /// Directory to scan (default: current directory)
     #[arg(short, long, default_value = ".")]
     dir: PathBuf,
 }
 
+#[derive(Subcommand, Debug)]
+enum Commands {
+    /// Update dirsweep to the latest version
+    Update,
+    /// Uninstall dirsweep from this system
+    Uninstall {
+        /// Skip confirmation prompt
+        #[arg(long, short)]
+        force: bool,
+    },
+}
+
 fn main() -> io::Result<()> {
     let args = Cli::parse();
-    let scan_path = if args.dir.is_absolute() {
-        args.dir
-    } else {
-        std::env::current_dir()?.join(&args.dir)
-    };
 
-    enable_raw_mode()?;
-    let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen)?;
-    let backend = CrosstermBackend::new(stdout);
-    let mut terminal = Terminal::new(backend)?;
+    match args.command {
+        Some(Commands::Update) => {
+            if let Err(e) = dirsweep::commands::cmd_update() {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+            return Ok(());
+        }
+        Some(Commands::Uninstall { force }) => {
+            if let Err(e) = dirsweep::commands::cmd_uninstall(force) {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+            return Ok(());
+        }
+        None => {
+            let scan_path = if args.dir.is_absolute() {
+                args.dir
+            } else {
+                std::env::current_dir()?.join(&args.dir)
+            };
 
-    let mut state = AppState::new(scan_path);
-    run_app(&mut terminal, &mut state)?;
+            enable_raw_mode()?;
+            let mut stdout = io::stdout();
+            execute!(stdout, EnterAlternateScreen)?;
+            let backend = CrosstermBackend::new(stdout);
+            let mut terminal = Terminal::new(backend)?;
 
-    disable_raw_mode()?;
-    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
-    terminal.show_cursor()?;
+            let mut state = AppState::new(scan_path);
+            run_app(&mut terminal, &mut state)?;
 
-    if state.total_deleted_count > 0 {
-        let noun = if state.total_deleted_count == 1 {
-            "directory"
-        } else {
-            "directories"
-        };
-        let size_str = humansize::format_size(state.total_deleted_size, humansize::BINARY);
-        println!(
-            "Sweeped {} {} ({} reclaimed)",
-            state.total_deleted_count, noun, size_str
-        );
+            disable_raw_mode()?;
+            execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+            terminal.show_cursor()?;
+
+            if state.total_deleted_count > 0 {
+                let noun = if state.total_deleted_count == 1 {
+                    "directory"
+                } else {
+                    "directories"
+                };
+                let size_str = humansize::format_size(state.total_deleted_size, humansize::BINARY);
+                println!(
+                    "Sweeped {} {} ({} reclaimed)",
+                    state.total_deleted_count, noun, size_str
+                );
+            }
+        }
     }
 
     Ok(())
