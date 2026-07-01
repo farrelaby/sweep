@@ -39,6 +39,8 @@ Entry point: `main.rs:fn main()`. TUI loop: `main.rs:fn run_app()`. Library root
 
 - `main` is protected — all changes must go through a PR
 - Feature branches named `kebab-case` (e.g. `ui-polish`, `language-based-redesign`)
+- **Never mix version bumps into feature branches** — versioning commits belong on a dedicated release branch or directly on `main`
+- **Release version bumps must always be prepared on their own dedicated branch** (e.g. `release/v0.2.2`), never alongside feature work
 
 ## Gotchas
 
