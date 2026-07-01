@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-01
+
+### Added
+- Language-based project detection with 7 ecosystems (rust, js, python, go, ruby, php, cocoapods)
+- Detection via lock files AND config files (pyproject.toml, go.mod, Gemfile, composer.json, etc.)
+- Recursive target dir scanning within project subtrees (`__pycache__`, `.venv`, `.tox`)
+- Project headers display detected languages (e.g. `my-app (js, rust)`)
+
+### Changed
+- Replaced flat `KNOWN_TARGETS` list with per-language `root_target_dirs` and `deep_target_dirs`
+- `vendor`, `Pods`, `node_modules` etc. only checked at project root (no false positives from source dirs)
+- `build` removed from default target dirs (language-specific now)
+
+### Removed
+- Orphan target detection entirely (zero false positive guarantee)
+
 ## [0.2.0] - 2026-07-01
 
 ### Added
