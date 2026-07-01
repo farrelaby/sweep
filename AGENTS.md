@@ -34,6 +34,7 @@ Entry point: `main.rs:fn main()`. TUI loop: `main.rs:fn run_app()`. Library root
 - **Commits**: conventional commits (`feat:`, `fix:`, `docs:`, `test:`, etc.)
 - **Clippy**: `-D warnings` — no warnings allowed
 - **Do not commit unless explicitly asked** — always wait for user confirmation before committing
+- **Changelog**: Always append a new `[Unreleased]` section to `CHANGELOG.md` for every release, documenting all changes since the last tagged version
 
 ## Branch Rules
 
