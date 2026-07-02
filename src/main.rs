@@ -28,7 +28,8 @@ enum SizeUpdate {
 #[derive(Parser, Debug)]
 #[command(
     name = "dirsweep",
-    about = "Find and remove bloated project directories"
+    about = "Find and remove bloated project directories",
+    version = env!("CARGO_PKG_VERSION")
 )]
 struct Cli {
     #[command(subcommand)]
